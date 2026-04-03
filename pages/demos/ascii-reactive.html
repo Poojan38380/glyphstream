@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GlyphStream — ASCII Reactive</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    html, body {
+      background: linear-gradient(180deg, #0a0a12 0%, #06060a 100%);
+      color: #ddd8d0;
+      min-height: 100%;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+    body { padding: 32px 300px 60px 32px; }
+    .header { margin-bottom: 24px; }
+    .header h1 { font: 600 22px/1.3 "Helvetica Neue"; color: rgba(255,255,255,0.9); margin-bottom: 4px; }
+    .header p { font: 400 12px/1.5 "Helvetica Neue"; color: rgba(255,255,255,0.3); }
+    .header a { color: rgba(196,163,90,0.8); text-decoration: none; }
+    .header a:hover { color: #c4a35a; }
+    #canvas {
+      width: 100%;
+      min-height: 400px;
+      cursor: crosshair;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 10px;
+      overflow: hidden;
+      background: rgba(0,0,0,0.3);
+    }
+    .hint {
+      margin-top: 12px;
+      font: 400 11px/1.4 "Helvetica Neue";
+      color: rgba(255,255,255,0.2);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>ASCII Reactive</h1>
+    <p>
+      Interactive ASCII art — move your mouse, click, or scroll to paint with characters.
+      <a href="ascii-ambient.html">← Typography</a>
+    </p>
+  </div>
+  <div id="canvas"></div>
+  <div class="hint" id="hint">Move your mouse over the canvas to paint</div>
+
+  <script type="module">
+    import { AsciiReactive } from '../src/components/ascii-reactive/index.ts'
+    import { buildSidebar } from '../src/ui/sidebar.ts'
+
+    const component = new AsciiReactive('#canvas', {
+      cols: 80, rows: 40, fontSize: 12,
+      fontFamily: 'Courier New, monospace',
+      inputMode: 'mouse', brushSize: 8, brushIntensity: 0.5,
+      decay: 0.95, colorMode: 'velocity',
+      palette: ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff'],
+      seed: 42,
+    })
+    component.start()
+
+    const params = component.getParams()
+    const presets = component.getPresets()
+
+    const hintEl = document.getElementById('hint')
+    const modeHints = {
+      mouse: 'Move your mouse over the canvas to paint',
+      click: 'Click anywhere to create ripple effects',
+      scroll: 'Scroll to paint across the canvas',
+      audio: 'Allow microphone access — speak or make sounds',
+      custom: 'Custom data source mode',
+    }
+
+    const sidebar = buildSidebar({
+      title: 'Reactive Controls',
+      presets,
+      onPresetSelect: (name) => {
+        component.setPreset(name)
+        const p = component.getParams()
+        hintEl.textContent = modeHints[p.inputMode] || ''
+      },
+      onRegenerate: () => {
+        component.regenerate(Math.floor(Math.random() * 10000))
+      },
+      onReset: () => {
+        component.updateParams({
+          cols: 80, rows: 40, fontSize: 12, fontFamily: 'Courier New, monospace',
+          inputMode: 'mouse', brushSize: 8, brushIntensity: 0.5,
+          decay: 0.95, colorMode: 'velocity',
+          palette: ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff'],
+          seed: 42,
+        })
+        hintEl.textContent = modeHints.mouse
+      },
+      controls: [
+        { id: 'inputMode', label: 'Input Mode', type: 'select', value: params.inputMode,
+          options: [
+            { label: 'Mouse', value: 'mouse' },
+            { label: 'Click', value: 'click' },
+            { label: 'Scroll', value: 'scroll' },
+            { label: 'Audio', value: 'audio' },
+          ],
+          onChange: (v) => {
+            component.updateParams({ inputMode: v })
+            hintEl.textContent = modeHints[v] || ''
+          }},
+        { id: 'brushSize', label: 'Brush Size', type: 'slider', min: 2, max: 30, step: 1, value: params.brushSize,
+          onChange: (v) => component.updateParams({ brushSize: v }) },
+        { id: 'brushIntensity', label: 'Intensity', type: 'slider', min: 0.1, max: 1, step: 0.05, value: params.brushIntensity,
+          onChange: (v) => component.updateParams({ brushIntensity: v }) },
+        { id: 'decay', label: 'Decay', type: 'slider', min: 0.85, max: 0.99, step: 0.01, value: params.decay,
+          onChange: (v) => component.updateParams({ decay: v }) },
+        { id: 'colorMode', label: 'Color Mode', type: 'select', value: params.colorMode,
+          options: [
+            { label: 'Palette', value: 'palette' },
+            { label: 'Velocity', value: 'velocity' },
+            { label: 'Position', value: 'position' },
+            { label: 'Time', value: 'time' },
+          ],
+          onChange: (v) => component.updateParams({ colorMode: v }) },
+        { id: 'seed', label: 'Seed', type: 'slider', min: 1, max: 9999, step: 1, value: params.seed,
+          onChange: (v) => component.regenerate(v) },
+      ],
+    })
+    document.body.appendChild(sidebar)
+  </script>
+</body>
+</html>

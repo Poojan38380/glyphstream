@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GlyphStream — Phase 1 Smoke Test</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    html, body {
+      background: linear-gradient(180deg, #0a0a12 0%, #06060a 100%);
+      color: #ddd8d0;
+      min-height: 100%;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 20px 60px;
+    }
+    h1 {
+      font: 600 24px/1.3 "Helvetica Neue";
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font: 400 13px/1.5 "Helvetica Neue";
+      color: rgba(255,255,255,0.3);
+      margin-bottom: 28px;
+      max-width: 600px;
+      text-align: center;
+    }
+    #smoke-test {
+      width: min(500px, calc(100vw - 40px));
+    }
+    .status {
+      margin-top: 20px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: "Courier New", monospace;
+    }
+    .status.pass { background: rgba(40,160,80,0.15); color: #6fcf8f; }
+    .status.fail { background: rgba(200,60,60,0.15); color: #f08080; }
+    .status.info { background: rgba(60,100,200,0.15); color: #8ab4f8; }
+    .controls {
+      margin-top: 16px;
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      background: rgba(255,255,255,0.08);
+      color: #ddd8d0;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: rgba(255,255,255,0.15); }
+  </style>
+</head>
+<body>
+  <h1>GlyphStream — Phase 1 Smoke Test</h1>
+  <p class="subtitle">
+    Core pipeline verification: particles → brightness field → ASCII character rendering.
+    If you see animated ASCII art below, Phase 1 is working.
+  </p>
+  <div id="smoke-test"></div>
+  <div id="status-log"></div>
+  <div class="controls">
+    <button id="btn-regen">Regenerate (new seed)</button>
+    <button id="btn-stop">Stop</button>
+    <button id="btn-start">Start</button>
+  </div>
+
+  <script type="module">
+    import {
+      ParticleSystem,
+      BrightnessField,
+      buildCharPalette,
+      DomRenderer,
+    } from '../src/core/index.ts'
+
+    // --- Config ---
+    const COLS = 50
+    const ROWS = 28
+    const FONT_SIZE = 14
+    const LINE_HEIGHT = 16
+    const TARGET_ROW_W = 440
+    const FONT_FAMILY = 'Georgia, Palatino, "Times New Roman", serif'
+    const MONO_FONT = 'Courier New'
+    const CANVAS_W = 220
+    const CANVAS_H = Math.round(CANVAS_W * ((ROWS * LINE_HEIGHT) / TARGET_ROW_W))
+    const OVERSAMPLE = 2
+
+    let seed = 42
+    let running = false
+    let animationId = null
+
+    // Pipeline instances (persisted across frames)
+    let particleSystem = null
+    let brightnessField = null
+    let paletteResult = null
+    let renderer = null
+
+    const container = document.getElementById('smoke-test')
+    const statusLog = document.getElementById('status-log')
+
+    function log(msg, type = 'info') {
+      const div = document.createElement('div')
+      div.className = `status ${type}`
+      div.textContent = msg
+      statusLog.innerHTML = ''
+      statusLog.appendChild(div)
+    }
+
+    // --- Build the pipeline ---
+    async function init() {
+      log(`Initializing with seed ${seed}...`)
+
+      try {
+        // Wait for fonts
+        await document.fonts.ready
+
+        // 1. Particle System
+        particleSystem = new ParticleSystem({
+          particleCount: 120,
+          canvasWidth: CANVAS_W,
+          canvasHeight: CANVAS_H,
+          attractorCount: 2,
+          attractorMode: 'lissajous',
+          spriteRadius: 14,
+          seed,
+        })
+
+        // 2. Brightness Field
+        brightnessField = new BrightnessField({
+          fieldCols: COLS * OVERSAMPLE,
+          fieldRows: ROWS * OVERSAMPLE,
+          decay: 0.82,
+          spriteRadius: 14,
+          attractorRadii: [30, 12],
+        }, CANVAS_W, CANVAS_H)
+
+        // 3. Character Palette
+        paletteResult = buildCharPalette({
+          font: {
+            fontFamily: FONT_FAMILY,
+            fontSize: FONT_SIZE,
+            lineHeight: LINE_HEIGHT,
+            variants: [
+              { weight: 300, style: 'normal' },
+              { weight: 500, style: 'normal' },
+              { weight: 800, style: 'normal' },
+              { weight: 300, style: 'italic' },
+              { weight: 500, style: 'italic' },
+              { weight: 800, style: 'italic' },
+            ],
+          },
+          charPalette: {
+            charset: ' .,:;!+-=*#@%&abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+            monoRamp: ' .`-_:,;^=+/|)\\!?0oOQ#%@',
+          },
+          grid: { cols: COLS, rows: ROWS, oversample: OVERSAMPLE },
+          targetRowWidth: TARGET_ROW_W,
+        })
+
+        log(`Palette built: ${paletteResult.palette.length} characters measured`)
+
+        // 4. DOM Renderer
+        renderer = new DomRenderer(
+          container,
+          { cols: COLS, rows: ROWS, oversample: OVERSAMPLE },
+          { mode: 'monochrome' },
+          {
+            fontFamily: FONT_FAMILY,
+            fontSize: FONT_SIZE,
+            lineHeight: LINE_HEIGHT,
+            variants: [
+              { weight: 300, style: 'normal' },
+              { weight: 500, style: 'normal' },
+              { weight: 800, style: 'normal' },
+              { weight: 300, style: 'italic' },
+              { weight: 500, style: 'italic' },
+              { weight: 800, style: 'italic' },
+            ],
+          },
+          { monoFontFamily: MONO_FONT },
+        )
+
+        // Inject palette CSS (only once)
+        if (!document.getElementById('gs-palette-css')) {
+          const styleEl = document.createElement('style')
+          styleEl.id = 'gs-palette-css'
+          styleEl.textContent = `
+            .w3 { font-weight: 300; }
+            .w5 { font-weight: 500; }
+            .w8 { font-weight: 800; }
+            .it { font-style: italic; }
+            .a1 { color: rgba(196,163,90,0.10); }
+            .a2 { color: rgba(196,163,90,0.20); }
+            .a3 { color: rgba(196,163,90,0.30); }
+            .a4 { color: rgba(196,163,90,0.40); }
+            .a5 { color: rgba(196,163,90,0.50); }
+            .a6 { color: rgba(196,163,90,0.60); }
+            .a7 { color: rgba(196,163,90,0.70); }
+            .a8 { color: rgba(196,163,90,0.80); }
+            .a9 { color: rgba(196,163,90,0.90); }
+            .a10 { color: rgba(196,163,90,1.0); }
+          `
+          document.head.appendChild(styleEl)
+        }
+
+        log('Renderer created. Starting animation...', 'pass')
+        running = true
+        startLoop()
+
+      } catch (err) {
+        log(`ERROR: ${err.message}`, 'fail')
+        console.error(err)
+      }
+    }
+
+    // --- Animation frame loop ---
+    function frame(time) {
+      if (!running) return
+      if (!particleSystem || !brightnessField || !paletteResult || !renderer) return
+
+      // Update particles
+      particleSystem.updateAttractors(time)
+      particleSystem.updateParticles()
+
+      // Decay field
+      brightnessField.decayField()
+
+      // Splat particles
+      for (const p of particleSystem.getParticles()) {
+        brightnessField.splatParticle(p.x, p.y)
+      }
+
+      // Splat attractors
+      const attractors = particleSystem.getAttractors()
+      for (let i = 0; i < attractors.length; i++) {
+        const attr = attractors[i]
+        brightnessField.splatAttractor(attr.x, attr.y, i)
+      }
+
+      // Render
+      renderer.render(brightnessField, paletteResult.brightnessLookup, time)
+
+      animationId = requestAnimationFrame(frame)
+    }
+
+    function startLoop() {
+      if (animationId) cancelAnimationFrame(animationId)
+      running = true
+      animationId = requestAnimationFrame(frame)
+    }
+
+    function stopLoop() {
+      running = false
+      if (animationId) {
+        cancelAnimationFrame(animationId)
+        animationId = null
+      }
+    }
+
+    // --- Controls ---
+    document.getElementById('btn-regen').addEventListener('click', () => {
+      seed = Math.floor(Math.random() * 10000)
+      stopLoop()
+      container.innerHTML = ''
+      init()
+    })
+
+    document.getElementById('btn-stop').addEventListener('click', () => {
+      stopLoop()
+      log('Animation stopped', 'info')
+    })
+
+    document.getElementById('btn-start').addEventListener('click', () => {
+      if (renderer) {
+        startLoop()
+        log(`Resumed with seed ${seed}`, 'pass')
+      } else {
+        init()
+      }
+    })
+
+    // Auto-start
+    init()
+  </script>
+</body>
+</html>

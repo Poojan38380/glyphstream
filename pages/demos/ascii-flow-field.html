@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GlyphStream — ASCII Flow Field</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    html, body {
+      background: linear-gradient(180deg, #0a0a12 0%, #06060a 100%);
+      color: #ddd8d0;
+      min-height: 100%;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+    body { padding: 32px 300px 60px 32px; }
+
+    .header { margin-bottom: 24px; }
+    .header h1 {
+      font: 600 22px/1.3 "Helvetica Neue";
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 4px;
+    }
+    .header p {
+      font: 400 12px/1.5 "Helvetica Neue";
+      color: rgba(255,255,255,0.3);
+    }
+    .header a {
+      color: rgba(196,163,90,0.8);
+      text-decoration: none;
+    }
+    .header a:hover { color: #c4a35a; }
+
+    #canvas {
+      width: 100%;
+      overflow: hidden;
+    }
+
+    /* Palette CSS */
+    .w3 { font-weight: 300; }
+    .w5 { font-weight: 500; }
+    .w8 { font-weight: 800; }
+    .it { font-style: italic; }
+    .a1 { color: rgba(196,163,90,0.10); }
+    .a2 { color: rgba(196,163,90,0.20); }
+    .a3 { color: rgba(196,163,90,0.30); }
+    .a4 { color: rgba(196,163,90,0.40); }
+    .a5 { color: rgba(196,163,90,0.50); }
+    .a6 { color: rgba(196,163,90,0.60); }
+    .a7 { color: rgba(196,163,90,0.70); }
+    .a8 { color: rgba(196,163,90,0.80); }
+    .a9 { color: rgba(196,163,90,0.90); }
+    .a10 { color: rgba(196,163,90,1.0); }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>ASCII Flow Field</h1>
+    <p>
+      Perlin noise flow field rendered as ASCII art. Particles follow vector forces,
+      accumulating into organic density maps.
+      <a href="smoke-test.html">← Back to smoke test</a>
+    </p>
+  </div>
+
+  <div id="canvas"></div>
+
+  <script type="module">
+    import { AsciiFlowField } from '../src/components/ascii-flow-field/index.ts'
+    import { buildSidebar } from '../src/ui/sidebar.ts'
+
+    // --- Create component ---
+    const component = new AsciiFlowField('#canvas', {
+      cols: 70,
+      rows: 35,
+      fontSize: 13,
+      fontFamily: 'Georgia, serif',
+      particleCount: 600,
+      noiseScale: 0.005,
+      noiseOctaves: 3,
+      particleSpeed: 0.6,
+      decay: 0.92,
+      flowMode: 'noise',
+      colorMode: 'monochrome',
+      monochromeColor: '#c4a35a',
+      seed: 42,
+    })
+
+    component.start()
+
+    // --- Build sidebar ---
+    const params = component.getParams()
+    const presets = component.getPresets()
+
+    const sidebar = buildSidebar({
+      title: 'Flow Field Controls',
+      presets,
+      onPresetSelect: (name) => component.setPreset(name),
+      onRegenerate: () => component.regenerate(Math.floor(Math.random() * 10000)),
+      onReset: () => {
+        component.updateParams({
+          cols: 70, rows: 35, fontSize: 13, fontFamily: 'Georgia, serif',
+          particleCount: 600, noiseScale: 0.005, noiseOctaves: 3,
+          particleSpeed: 0.6, decay: 0.92, flowMode: 'noise',
+          colorMode: 'monochrome', monochromeColor: '#c4a35a', seed: 42,
+        })
+      },
+      controls: [
+        {
+          id: 'particleSpeed', label: 'Speed', type: 'slider',
+          min: 0, max: 2, step: 0.1, value: params.particleSpeed,
+          onChange: (v) => component.updateParams({ particleSpeed: v }),
+        },
+        {
+          id: 'decay', label: 'Decay', type: 'slider',
+          min: 0.8, max: 0.99, step: 0.01, value: params.decay,
+          onChange: (v) => component.updateParams({ decay: v }),
+        },
+        {
+          id: 'noiseScale', label: 'Noise Scale', type: 'slider',
+          min: 0.001, max: 0.02, step: 0.001, value: params.noiseScale,
+          onChange: (v) => component.updateParams({ noiseScale: v }),
+        },
+        {
+          id: 'noiseOctaves', label: 'Noise Octaves', type: 'slider',
+          min: 1, max: 6, step: 1, value: params.noiseOctaves,
+          onChange: (v) => component.updateParams({ noiseOctaves: v }),
+        },
+        {
+          id: 'flowMode', label: 'Flow Mode', type: 'select',
+          value: params.flowMode,
+          options: [
+            { label: 'Noise', value: 'noise' },
+            { label: 'Spiral', value: 'spiral' },
+            { label: 'Waves', value: 'waves' },
+          ],
+          onChange: (v) => component.updateParams({ flowMode: v }),
+        },
+        {
+          id: 'colorMode', label: 'Color Mode', type: 'select',
+          value: params.colorMode,
+          options: [
+            { label: 'Monochrome', value: 'monochrome' },
+            { label: 'Gradient', value: 'gradient' },
+            { label: 'Palette', value: 'palette' },
+          ],
+          onChange: (v) => component.updateParams({ colorMode: v }),
+        },
+        {
+          id: 'color', label: 'Color', type: 'color',
+          value: params.monochromeColor,
+          onChange: (v) => component.updateParams({ monochromeColor: v }),
+        },
+        {
+          id: 'cols', label: 'Columns (rebuild)', type: 'slider',
+          min: 20, max: 120, step: 1, value: params.cols,
+          onChange: (v) => component.updateParams({ cols: v }),
+        },
+        {
+          id: 'rows', label: 'Rows (rebuild)', type: 'slider',
+          min: 10, max: 60, step: 1, value: params.rows,
+          onChange: (v) => component.updateParams({ rows: v }),
+        },
+        {
+          id: 'fontSize', label: 'Font Size (rebuild)', type: 'slider',
+          min: 8, max: 24, step: 1, value: params.fontSize,
+          onChange: (v) => component.updateParams({ fontSize: v }),
+        },
+        {
+          id: 'particleCount', label: 'Particles (rebuild)', type: 'slider',
+          min: 50, max: 2000, step: 50, value: params.particleCount,
+          onChange: (v) => component.updateParams({ particleCount: v }),
+        },
+        {
+          id: 'seed', label: 'Seed (rebuild)', type: 'slider',
+          min: 1, max: 9999, step: 1, value: params.seed,
+          onChange: (v) => component.regenerate(v),
+        },
+      ],
+    })
+
+    document.body.appendChild(sidebar)
+  </script>
+</body>
+</html>

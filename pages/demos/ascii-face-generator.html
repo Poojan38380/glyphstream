@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GlyphStream — Random ASCII Face Generator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    html, body {
+      background: linear-gradient(180deg, #0a0a12 0%, #06060a 100%);
+      color: #ddd8d0;
+      min-height: 100%;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .header h1 {
+      font: 600 28px/1.2 "Helvetica Neue";
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 6px;
+    }
+    .header p {
+      font: 400 13px/1.5 "Helvetica Neue";
+      color: rgba(255,255,255,0.3);
+    }
+    .header a {
+      color: rgba(196,163,90,0.8);
+      text-decoration: none;
+    }
+    .header a:hover { color: #c4a35a; }
+
+    #face-container {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 32px;
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.3s;
+    }
+
+    .generate-btn {
+      margin-top: 24px;
+      padding: 14px 40px;
+      font: 600 15px/1 "Helvetica Neue";
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #fff;
+      background: linear-gradient(135deg, rgba(196,163,90,0.3), rgba(196,163,90,0.15));
+      border: 1px solid rgba(196,163,90,0.4);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .generate-btn:hover {
+      background: linear-gradient(135deg, rgba(196,163,90,0.4), rgba(196,163,90,0.25));
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(196,163,90,0.2);
+    }
+    .generate-btn:active {
+      transform: translateY(0);
+    }
+
+    .placeholder {
+      text-align: center;
+      color: rgba(255,255,255,0.2);
+      font-size: 14px;
+    }
+    .placeholder .icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .seed-display {
+      margin-top: 12px;
+      font: 400 11px/1 "Courier New", monospace;
+      color: rgba(255,255,255,0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Random ASCII Face Generator</h1>
+    <p>
+      Procedurally generated talking faces. Every click is a new person.
+      <a href="ascii-ambient.html">← Ambient</a>
+    </p>
+  </div>
+
+  <div id="face-container">
+    <div class="placeholder" id="placeholder">
+      <div class="icon">🎭</div>
+      <div>Click Generate to create a random face</div>
+    </div>
+  </div>
+
+  <button class="generate-btn" id="generate-btn">Generate Random Face</button>
+  <div class="seed-display" id="seed-display"></div>
+
+  <script type="module">
+    import { AsciiFaceGenerator } from '../src/components/ascii-face-generator/index.ts'
+
+    const container = document.getElementById('face-container')
+    const placeholder = document.getElementById('placeholder')
+    const btn = document.getElementById('generate-btn')
+    const seedDisplay = document.getElementById('seed-display')
+
+    const faceGen = new AsciiFaceGenerator(container)
+    let currentSeed = Math.floor(Math.random() * 99999)
+
+    btn.addEventListener('click', () => {
+      currentSeed = Math.floor(Math.random() * 99999)
+
+      // Remove placeholder on first generation
+      if (placeholder) placeholder.remove()
+
+      // Stop previous animation
+      faceGen.stopTalking()
+
+      // Generate new face
+      faceGen.generate(currentSeed)
+
+      // Start talking
+      faceGen.startTalking()
+
+      // Show seed
+      seedDisplay.textContent = `Seed: ${currentSeed}`
+    })
+
+    // Auto-generate on load
+    btn.click()
+  </script>
+</body>
+</html>
