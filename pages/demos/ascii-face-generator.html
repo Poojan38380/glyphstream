@@ -20,24 +20,10 @@
       padding: 40px 20px;
       min-height: 100vh;
     }
-
-    .header {
-      text-align: center;
-      margin-bottom: 32px;
-    }
-    .header h1 {
-      font: 600 28px/1.2 "Helvetica Neue";
-      color: rgba(255,255,255,0.9);
-      margin-bottom: 6px;
-    }
-    .header p {
-      font: 400 13px/1.5 "Helvetica Neue";
-      color: rgba(255,255,255,0.3);
-    }
-    .header a {
-      color: rgba(196,163,90,0.8);
-      text-decoration: none;
-    }
+    .header { text-align: center; margin-bottom: 32px; }
+    .header h1 { font: 600 28px/1.2 "Helvetica Neue"; color: rgba(255,255,255,0.9); margin-bottom: 6px; }
+    .header p { font: 400 13px/1.5 "Helvetica Neue"; color: rgba(255,255,255,0.3); }
+    .header a { color: rgba(196,163,90,0.8); text-decoration: none; }
     .header a:hover { color: #c4a35a; }
 
     #face-container {
@@ -45,7 +31,7 @@
       border: 1px solid rgba(255,255,255,0.06);
       border-radius: 16px;
       padding: 32px;
-      min-height: 500px;
+      min-height: 520px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -71,32 +57,19 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 20px rgba(196,163,90,0.2);
     }
-    .generate-btn:active {
-      transform: translateY(0);
-    }
+    .generate-btn:active { transform: translateY(0); }
 
-    .placeholder {
-      text-align: center;
-      color: rgba(255,255,255,0.2);
-      font-size: 14px;
-    }
-    .placeholder .icon {
-      font-size: 48px;
-      margin-bottom: 12px;
-    }
-
-    .seed-display {
-      margin-top: 12px;
-      font: 400 11px/1 "Courier New", monospace;
-      color: rgba(255,255,255,0.2);
-    }
+    .placeholder { text-align: center; color: rgba(255,255,255,0.2); font-size: 14px; }
+    .placeholder .icon { font-size: 48px; margin-bottom: 12px; }
+    .seed-display { margin-top: 12px; font: 400 11px/1 "Courier New", monospace; color: rgba(255,255,255,0.2); }
   </style>
 </head>
 <body>
   <div class="header">
     <h1>Random ASCII Face Generator</h1>
     <p>
-      Procedurally generated talking faces. Every click is a new person.
+      Procedurally generated talking faces with viseme-based mouth animation.
+      Every click creates a new person.
       <a href="ascii-ambient.html">← Ambient</a>
     </p>
   </div>
@@ -124,21 +97,11 @@
 
     btn.addEventListener('click', () => {
       currentSeed = Math.floor(Math.random() * 99999)
-
-      // Remove placeholder on first generation
       if (placeholder) placeholder.remove()
-
-      // Stop previous animation
       faceGen.stopTalking()
-
-      // Generate new face
       faceGen.generate(currentSeed)
-
-      // Start talking
       faceGen.startTalking()
-
-      // Show seed
-      seedDisplay.textContent = `Seed: ${currentSeed}`
+      seedDisplay.textContent = `seed: ${currentSeed}`
     })
 
     // Auto-generate on load
