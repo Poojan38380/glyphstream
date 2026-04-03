@@ -31,8 +31,8 @@ const FEMALE_PALETTES = [
 
 // --- Grid ---
 
-const W = 50
-const H = 56
+const W = 48
+const H = 30
 
 type Grid = string[][]
 
