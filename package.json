@@ -1,5 +1,31 @@
 {
   "name": "glyphstream",
+  "version": "0.1.0",
+  "description": "Dynamic ASCII art components for the browser. Five generative algorithms — each a living system, every render unique.",
+  "author": "Poojan",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Poojan38380/glyphstream"
+  },
+  "homepage": "https://glyphstream.vercel.app/",
+  "bugs": {
+    "url": "https://github.com/Poojan38380/glyphstream/issues"
+  },
+  "keywords": [
+    "ascii",
+    "generative-art",
+    "creative-coding",
+    "typography",
+    "particle-system",
+    "flow-field",
+    "text-art",
+    "canvas",
+    "canvas2d",
+    "pretext",
+    "ascii-art",
+    "procedural-generation"
+  ],
   "private": true,
   "type": "module",
   "scripts": {

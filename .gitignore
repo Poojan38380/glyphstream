@@ -2,6 +2,7 @@
 node_modules/
 dist/
 pages/dist/
+pages/public/
 site/
 
 # OS

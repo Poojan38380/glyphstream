@@ -3,6 +3,7 @@ import { resolve } from 'path'
 
 export default defineConfig({
   root: 'pages',
+  publicDir: 'public',
   build: {
     outDir: '../dist',
     emptyOutDir: true,

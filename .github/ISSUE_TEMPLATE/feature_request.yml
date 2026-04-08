@@ -1,0 +1,48 @@
+name: ✨ Feature Request
+description: Suggest a new feature or component
+title: '[Feature]: '
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea for a new feature? We'd love to hear it!
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the Feature
+      description: What would you like to see added?
+    validations:
+      required: true
+  - type: textarea
+    id: usecase
+    attributes:
+      label: Use Case
+      description: How would this be used? What problem does it solve?
+      placeholder: "I want to be able to..."
+    validations:
+      required: true
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Implementation Ideas
+      description: Any thoughts on how this could be implemented?
+  - type: dropdown
+    id: component
+    attributes:
+      label: Related Component
+      multiple: true
+      options:
+        - ASCII Flow Field
+        - ASCII Typography
+        - ASCII Reactive
+        - ASCII Ambient
+        - ASCII Face Generator
+        - Core Engine
+        - New Component
+        - Other
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Screenshots, links, or anything else that helps

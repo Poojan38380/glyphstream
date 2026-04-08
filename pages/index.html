@@ -5,6 +5,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GlyphStream — Dynamic ASCII Art Components</title>
+  <meta name="description"
+    content="Five generative ASCII art algorithms for the browser. Flow fields, typography, reactive art, ambient backgrounds, and face generation.">
+
+  <!-- Open Graph / Social Preview -->
+  <meta property="og:title" content="GlyphStream — Dynamic ASCII Art Components">
+  <meta property="og:description"
+    content="Five generative ASCII art algorithms — each a living system, every render unique.">
+  <meta property="og:image" content="./home-page.png">
+  <meta property="og:url" content="https://glyphstream.vercel.app/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+
   <style>
     * {
       box-sizing: border-box;
@@ -26,7 +38,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 60px 20px 40px;
+      padding: 80px 20px 60px;
       text-align: center;
       overflow: hidden;
     }
@@ -34,7 +46,7 @@
     .hero-bg {
       position: absolute;
       inset: 0;
-      opacity: 0.15;
+      opacity: 0.12;
       pointer-events: none;
       z-index: 0;
     }
@@ -42,13 +54,14 @@
     .hero-content {
       position: relative;
       z-index: 1;
+      max-width: 700px;
     }
 
     .hero h1 {
-      font: 700 48px/1.1 "Helvetica Neue";
+      font: 700 56px/1.1 "Helvetica Neue";
       color: rgba(255, 255, 255, 0.95);
-      margin-bottom: 8px;
-      letter-spacing: -1px;
+      margin-bottom: 12px;
+      letter-spacing: -1.5px;
     }
 
     .hero h1 span {
@@ -56,10 +69,10 @@
     }
 
     .hero .tagline {
-      font: 400 16px/1.5 "Helvetica Neue";
-      color: rgba(255, 255, 255, 0.35);
-      max-width: 500px;
-      margin: 0 auto 24px;
+      font: 400 18px/1.5 "Helvetica Neue";
+      color: rgba(255, 255, 255, 0.4);
+      max-width: 550px;
+      margin: 0 auto 28px;
     }
 
     .hero-links {
@@ -70,12 +83,14 @@
     }
 
     .btn {
-      display: inline-block;
-      padding: 10px 24px;
-      border-radius: 6px;
-      font: 500 13px/1 "Helvetica Neue";
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font: 600 14px/1 "Helvetica Neue";
       text-decoration: none;
-      transition: background 0.15s, transform 0.1s;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
     }
 
     .btn:hover {
@@ -90,6 +105,7 @@
 
     .btn-primary:hover {
       background: rgba(196, 163, 90, 0.3);
+      box-shadow: 0 4px 20px rgba(196, 163, 90, 0.15);
     }
 
     .btn-secondary {
@@ -102,23 +118,82 @@
       background: rgba(255, 255, 255, 0.1);
     }
 
+    /* --- Stats Bar --- */
+    .stats {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      padding: 32px 20px;
+      margin-top: 40px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font: 700 32px/1 "Helvetica Neue";
+      color: #c4a35a;
+    }
+
+    .stat-label {
+      font: 400 11px/1.4 "Helvetica Neue";
+      color: rgba(255, 255, 255, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    /* --- Showcase Hero --- */
+    .showcase-hero {
+      max-width: 1100px;
+      margin: 60px auto 0;
+      padding: 0 20px;
+      text-align: center;
+    }
+
+    .showcase-hero p {
+      font: 400 15px/1.6 "Helvetica Neue";
+      color: rgba(255, 255, 255, 0.35);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .showcase-image {
+      margin-top: 32px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .showcase-image img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
     /* --- Components Grid --- */
     .section {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 40px 20px;
+      padding: 60px 20px;
     }
 
     .section-title {
-      font: 600 20px/1.3 "Helvetica Neue";
-      color: rgba(255, 255, 255, 0.8);
-      margin-bottom: 24px;
-      letter-spacing: 0.5px;
+      font: 600 24px/1.3 "Helvetica Neue";
+      color: rgba(255, 255, 255, 0.85);
+      margin-bottom: 32px;
+      letter-spacing: 0.3px;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 20px;
     }
 
@@ -126,7 +201,7 @@
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 12px;
-      padding: 24px;
+      overflow: hidden;
       transition: border-color 0.2s, background 0.2s, transform 0.15s;
       text-decoration: none;
       color: inherit;
@@ -137,29 +212,62 @@
     .card:hover {
       border-color: rgba(196, 163, 90, 0.3);
       background: rgba(196, 163, 90, 0.04);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
     }
 
-    .card-icon {
-      font-size: 28px;
-      margin-bottom: 12px;
+    .card-preview {
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .card h3 {
-      font: 600 16px/1.3 "Helvetica Neue";
+    .card-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+
+    .card:hover .card-preview img {
+      transform: scale(1.03);
+    }
+
+    .card-preview video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card-body h3 {
+      font: 600 17px/1.3 "Helvetica Neue";
       color: rgba(255, 255, 255, 0.85);
-      margin-bottom: 6px;
     }
 
-    .card p {
-      font: 400 12px/1.5 "Helvetica Neue";
+    .card-body p {
+      font: 400 13px/1.5 "Helvetica Neue";
       color: rgba(255, 255, 255, 0.35);
-      flex: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px 16px;
     }
 
     .card-tag {
       display: inline-block;
-      margin-top: 12px;
       padding: 3px 8px;
       border-radius: 4px;
       font: 500 10px/1 "Helvetica Neue";
@@ -169,11 +277,50 @@
       text-transform: uppercase;
     }
 
+    .card-link {
+      font: 500 12px/1 "Helvetica Neue";
+      color: rgba(196, 163, 90, 0.7);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .card-link:hover {
+      color: #c4a35a;
+    }
+
     /* --- Quick Start --- */
     .quickstart {
-      max-width: 700px;
+      max-width: 750px;
       margin: 0 auto;
-      padding: 40px 20px 60px;
+      padding: 60px 20px;
+    }
+
+    .quickstart-steps {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .step {
+      flex: 1;
+      min-width: 140px;
+      text-align: center;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+    }
+
+    .step-num {
+      font: 700 24px/1 "Helvetica Neue";
+      color: #c4a35a;
+      margin-bottom: 4px;
+    }
+
+    .step-text {
+      font: 400 12px/1.4 "Helvetica Neue";
+      color: rgba(255, 255, 255, 0.4);
     }
 
     .code-block {
@@ -202,7 +349,7 @@
     /* --- Footer --- */
     footer {
       text-align: center;
-      padding: 30px 20px;
+      padding: 40px 20px;
       font: 400 11px/1.5 "Helvetica Neue";
       color: rgba(255, 255, 255, 0.2);
       border-top: 1px solid rgba(255, 255, 255, 0.04);
@@ -216,6 +363,34 @@
     footer a:hover {
       color: #c4a35a;
     }
+
+    /* --- Responsive --- */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 36px;
+      }
+
+      .hero .tagline {
+        font-size: 16px;
+      }
+
+      .stats {
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+
+      .stat-value {
+        font-size: 24px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .quickstart-steps {
+        flex-direction: column;
+      }
+    }
   </style>
 </head>
 
@@ -227,15 +402,44 @@
     <div class="hero-content">
       <h1>Glyph<span>Stream</span></h1>
       <p class="tagline">
-        Dynamic ASCII art components for the browser. Five generative algorithms — each a living system, every render
-        unique.
+        Five generative ASCII art algorithms for the browser. Each a living system — every render unique.
       </p>
       <div class="hero-links">
-        <a href="demos/ascii-flow-field.html" class="btn btn-primary">Explore Components →</a>
-        <a href="demos/smoke-test.html" class="btn btn-secondary">Smoke Test</a>
+        <a href="demos/ascii-flow-field.html" class="btn btn-primary">⚡ Explore Components</a>
         <a href="https://github.com/Poojan38380/glyphstream" target="_blank" rel="noreferrer"
-          class="btn btn-secondary">GitHub ↗</a>
+          class="btn btn-secondary">⭐ GitHub</a>
+        <a href="demos/smoke-test.html" class="btn btn-secondary">Smoke Test</a>
       </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value">5</div>
+      <div class="stat-label">Components</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">0</div>
+      <div class="stat-label">Framework Deps</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">∞</div>
+      <div class="stat-label">Unique Renders</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">MIT</div>
+      <div class="stat-label">License</div>
+    </div>
+  </div>
+
+  <!-- Showcase -->
+  <div class="showcase-hero">
+    <p>Built with <a href="https://github.com/chenglou/pretext" target="_blank" rel="noreferrer">pretext</a> for precise
+      text measurement. Every component is a single, self-contained generative algorithm — seed it, start it, watch it
+      breathe.</p>
+    <div class="showcase-image">
+      <img src="./home-page.png" alt="GlyphStream live homepage with ASCII flow field background">
     </div>
   </div>
 
@@ -244,37 +448,78 @@
     <h2 class="section-title">Components</h2>
     <div class="grid">
       <a href="demos/ascii-flow-field.html" class="card">
-        <div class="card-icon">〰️</div>
-        <h3>ASCII Flow Field</h3>
-        <p>Perlin noise flow field rendered as ASCII. Particles follow vector forces, accumulating into organic density
-          maps. 3 flow modes, 5 presets.</p>
-        <span class="card-tag">Generative</span>
+        <div class="card-preview">
+          <img src="./ASCII-flow-field.png" alt="ASCII Flow Field">
+        </div>
+        <div class="card-body">
+          <h3>〰️ ASCII Flow Field</h3>
+          <p>Perlin noise flow field rendered as ASCII. Particles follow vector forces, accumulating into organic
+            density maps.</p>
+        </div>
+        <div class="card-footer">
+          <span class="card-tag">Generative</span>
+          <span class="card-link">Open demo →</span>
+        </div>
       </a>
+
       <a href="demos/ascii-typography.html" class="card">
-        <div class="card-icon">𝐀</div>
-        <h3>ASCII Typography</h3>
-        <p>Variable font weights × styles as ASCII art. Particle-driven brightness field with proportional and monospace
-          comparison.</p>
-        <span class="card-tag">Typography</span>
+        <div class="card-preview">
+          <img src="./ascii-typography.png" alt="ASCII Typography">
+        </div>
+        <div class="card-body">
+          <h3>𝐀 ASCII Typography</h3>
+          <p>Variable font weights × styles as ASCII art. Particle-driven brightness field with proportional and
+            monospace comparison.</p>
+        </div>
+        <div class="card-footer">
+          <span class="card-tag">Typography</span>
+          <span class="card-link">Open demo →</span>
+        </div>
       </a>
+
       <a href="demos/ascii-reactive.html" class="card">
-        <div class="card-icon">🖱️</div>
-        <h3>ASCII Reactive</h3>
-        <p>Interactive ASCII art — mouse, click, scroll, or audio input. Paint with characters in real-time.</p>
-        <span class="card-tag">Interactive</span>
+        <div class="card-preview">
+          <img src="./reactive.png" alt="ASCII Reactive">
+        </div>
+        <div class="card-body">
+          <h3>🖱️ ASCII Reactive</h3>
+          <p>Interactive ASCII art — mouse, click, scroll, or audio input. Paint with characters in real-time.</p>
+        </div>
+        <div class="card-footer">
+          <span class="card-tag">Interactive</span>
+          <span class="card-link">Open demo →</span>
+        </div>
       </a>
+
       <a href="demos/ascii-ambient.html" class="card">
-        <div class="card-icon">🌅</div>
-        <h3>ASCII Ambient</h3>
-        <p>Slow, meditative ASCII art that breathes and drifts. A living background for focus and calm.</p>
-        <span class="card-tag">Ambient</span>
+        <div class="card-preview">
+          <video autoplay loop muted playsinline>
+            <source src="./ambient.mp4" type="video/mp4">
+            <img src="./ambient.png" alt="ASCII Ambient">
+          </video>
+        </div>
+        <div class="card-body">
+          <h3>🌅 ASCII Ambient</h3>
+          <p>Slow, meditative ASCII art that breathes and drifts. A living background for focus and calm.</p>
+        </div>
+        <div class="card-footer">
+          <span class="card-tag">Ambient</span>
+          <span class="card-link">Open demo →</span>
+        </div>
       </a>
+
       <a href="demos/ascii-face-generator.html" class="card">
-        <div class="card-icon">🎭</div>
-        <h3>ASCII Face Generator</h3>
-        <p>Procedurally generated talking faces. Random gender, features, and accessories. Blue for male, pink for
-          female.</p>
-        <span class="card-tag">Generative</span>
+        <div class="card-preview">
+          <img src="./face-generator.png" alt="ASCII Face Generator">
+        </div>
+        <div class="card-body">
+          <h3>🎭 ASCII Face Generator</h3>
+          <p>Procedurally generated talking faces. Random gender, features, and accessories.</p>
+        </div>
+        <div class="card-footer">
+          <span class="card-tag">Generative</span>
+          <span class="card-link">Open demo →</span>
+        </div>
       </a>
     </div>
   </div>
@@ -282,25 +527,47 @@
   <!-- Quick Start -->
   <div class="quickstart">
     <h2 class="section-title">Quick Start</h2>
-    <div class="code-block"><span class="comment">// Each component is a single HTML page + TypeScript module</span>
-      <span class="comment">// Import and use directly in your project:</span>
+    <div class="quickstart-steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Clone the repo</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">
+          <code>npm install</code>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">
+          <code>npm run dev</code>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">Open localhost</div>
+      </div>
+    </div>
+    <div class="code-block"><span class="comment">// Import any component and start rendering:</span>
 
       <span class="keyword">import</span> { AsciiFlowField } <span class="keyword">from</span> <span
         class="string">'./src/components/ascii-flow-field'</span>
 
       <span class="keyword">const</span> art = <span class="keyword">new</span> AsciiFlowField(<span
         class="string">'#container'</span>, {
-      cols: 70,
-      rows: 35,
+      cols: 80,
+      rows: 40,
       particleCount: 600,
       noiseScale: 0.005,
-      colorMode: <span class="string">'monochrome'</span>,
+      colorMode: <span class="string">'gradient'</span>,
+      palette: [<span class="string">'#c4a35a'</span>, <span class="string">'#8b6914'</span>],
       seed: 42,
       })
 
       art.<span class="keyword">start</span>()
       art.<span class="keyword">setPreset</span>(<span class="string">'turbulent'</span>)
-      art.<span class="keyword">regenerate</span>(123)
+      art.<span class="keyword">regenerate</span>(123) <span class="comment">// new seed, new art</span>
     </div>
   </div>
 
@@ -308,7 +575,8 @@
   <footer>
     Built with <a href="https://github.com/chenglou/pretext" target="_blank" rel="noreferrer">pretext</a> ·
     Open Source · MIT License ·
-    <a href="https://github.com/Poojan38380/glyphstream" target="_blank" rel="noreferrer">GitHub</a>
+    <a href="https://github.com/Poojan38380/glyphstream" target="_blank" rel="noreferrer">GitHub</a> ·
+    <a href="https://glyphstream.vercel.app/" target="_blank" rel="noreferrer">Live Demo</a>
   </footer>
 
   <!-- Hero background: live flow field -->
