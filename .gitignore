@@ -9,6 +9,9 @@ site/
 .DS_Store
 Thumbs.db
 
+# Generated favicons (keep only favicon.svg)
+public/favicon-*.png
+
 # Editor
 .vscode/
 .idea/
